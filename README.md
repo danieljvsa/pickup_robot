@@ -1,5 +1,5 @@
 <h1 align="center">
-  Naped
+  Pickup Robot
 </h1>
 
 <p align="center">
