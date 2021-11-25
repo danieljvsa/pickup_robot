@@ -110,10 +110,11 @@ def h(p1, p2):
     return abs(x1 - x2) + abs(y1 - y2)
 
 #funcao para calcular a distancia do inicio aos pacotes (alterar para fazer para todos os pontos)
-def calc_points(grid, start, end, packages):
+def calc_points(draw , grid, start, end, packages):
     points = packages
+    score_count = 0
     count = 0
-    count_data = 1
+    count_data = 0
     scores = []
     n_scores = []
     custom_path = []
@@ -123,19 +124,13 @@ def calc_points(grid, start, end, packages):
     data = []
     custom_path_header = ['Ponto', 'Coordenadas', 'Custo']
 
-    #print(points)
-    data.append('Ponto de partida')
-    data.append(start.get_pos())
-    data.append(0)
     with open('robot_path.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(custom_path_header)
-        writer.writerow(data)
 
-    data = []
 
     for i in range(0, len(packages)):
-        score = calc_pit(start.get_pos(), packages[i].get_pos()) + h(start.get_pos(), packages[i].get_pos())
+        score = 0 + h(start.get_pos(), points[i].get_pos())
         #print(calc_pit(start.get_pos(), packages[i].get_pos()))
         #print(h(start.get_pos(), packages[i].get_pos()))
         scores.append(score)
@@ -150,9 +145,11 @@ def calc_points(grid, start, end, packages):
                     scores[l] = temp1
                     points[l] = temp2
     last = points[0]
-    data.append('Pacote 1')
-    data.append(points[0].get_pos())
-    data.append(round(scores[0], 2))
+    data.append('Start')
+    data.append(start.get_pos())
+    #print(str(round(scores[0], 0))
+    #print(str(score_count))
+    data.append(scores[0])
     with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(data)
@@ -161,6 +158,44 @@ def calc_points(grid, start, end, packages):
     data = []
     points.pop(0)
     custom_path.append(last)
+    scores = []
+    #print(points)
+    count = count + 1
+    count_data = count_data + 1
+
+    came_from_length = algorithm_calc(draw, grid, start, last)
+    #print(came_from_length)
+    for i in range(0, len(packages)):
+        score = came_from_length + h(last.get_pos(), points[i].get_pos())
+        #print(calc_pit(start.get_pos(), packages[i].get_pos()))
+        #print(h(start.get_pos(), packages[i].get_pos()))
+        scores.append(score)
+    for k in range(0, len(packages)):
+        for l in range(0, len(packages)):
+            if(l < len(packages) - 1):
+                if(scores[k] < scores[l]):
+                    temp1 = scores[k]
+                    temp2 = points[k]
+                    scores[k] = scores[l]
+                    points[k] = points[l]
+                    scores[l] = temp1
+                    points[l] = temp2
+    data.append('Pacote ' + str(count_data))
+    data.append(last.get_pos())
+    #print(str(round(scores[0], 0))
+    #print(str(score_count))
+    last = points[0]
+    data.append(scores[0])
+    with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+        #writer.close()
+    #print(data)
+    data = []
+    points.pop(0)
+    custom_path.append(last)
+    scores = []
+    came_from_length = 0
     #print(points)
     count = count + 1
     count_data = count_data + 1
@@ -168,10 +203,80 @@ def calc_points(grid, start, end, packages):
     for i in range(0, len(packages)):
         #print(points)
         #print(count)
+        if(count == 2 or len(points) == 0):
+            if(custom_path[-1] == end):
+                count == 0 
+                print('its end')
+            else:
+                if(i == 0):
+                    len_cp = len(custom_path)
+                    came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-2], last)
+                    #print(came_from_length)
+                    f_score = came_from_length + h(last.get_pos(), end.get_pos())
+                    data.append('Pacote ' + str(count_data))
+                    data.append(last.get_pos())
+                    # print(str(score_count))
+                    data.append(round(f_score, 0))
+                    with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(data)
+                    data = []
+                    came_from_length = 0
+                end_score = 0
+                end_score = h(custom_path[len_cp-1].get_pos(), end.get_pos()) + 0
+                custom_path.append(end)
+                count = 0
+                data.append('End')
+                data.append(end.get_pos())
+                #print(str(score_count))
+                data.append(round(end_score, 0))
+                with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data) 
+                data = [] 
+                if(count_data == 2):
+                    count_data = count_data + 1
+            if(len(points) > 0):
+                #print(len(points))
+                came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-1], end)
+                #print(came_from_length)
+                for o in range(0, len(packages)):
+                    score = came_from_length + h(end.get_pos(), points[o].get_pos())
+                    n_scores.append(score) 
+                for k in range(0, len(packages)):
+                    for l in range(0, len(packages)):
+                        if(l < len(packages) - 1):
+                            if(n_scores[k] < n_scores[l]):
+                                temp1 = n_scores[k]
+                                temp2 = points[k]
+                                n_scores[k] = n_scores[l]
+                                points[k] = points[l]
+                                n_scores[l] = temp1
+                                points[l] = temp2
+                last = points[0]
+                custom_path.append(last)
+                data.append('Pacote ' + str(count_data))
+                data.append(last.get_pos())
+               # print(str(score_count))
+                data.append(round(n_scores[0], 0))
+                with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data)
+                data = []
+                points.pop(0)
+                came_from_length = 0
+                n_scores = []
+                count = count + 1
+                count_data = count_data + 1
+                #print(count)
+
+        len_cp = len(custom_path)
         if(last == end):
             print('Its end')
         for o in range(0, len(packages)):
-            score = calc_pit(last.get_pos(), points[o].get_pos()) + h(last.get_pos(), points[o].get_pos())
+            came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-2], last)
+            #print(came_from_length)
+            score = came_from_length + h(last.get_pos(), points[o].get_pos())
             n_scores.append(score) 
         for k in range(0, len(packages)):
             for l in range(0, len(packages)):
@@ -185,10 +290,12 @@ def calc_points(grid, start, end, packages):
                         points[l] = temp2
         if(len(points) > 0):
             last = points[0]
-            custom_path.append(points[0])
             data.append('Pacote ' + str(count_data))
-            data.append(points[0].get_pos())
-            data.append(round(n_scores[0], 2))
+            data.append(last.get_pos())
+            #print(str(round(n_scores[0], 0)))
+            #print(str(score_count))
+            data.append(round(n_scores[0], 0))
+            custom_path.append(last)
             with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(data)
@@ -201,48 +308,7 @@ def calc_points(grid, start, end, packages):
             #print(last)
             n_scores = []
             #print(count)
-        if(count == 2 or len(points) == 0):
-            if(custom_path[-1] == end):
-                count == 0
-            else:
-                custom_path.append(end)
-                count = 0
-                data.append('Ponto de entrega')
-                data.append(end.get_pos())
-                data.append('---')
-                with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(data) 
-                data = [] 
-            if(len(points) > 0):
-                #print(len(points))
-                for o in range(0, len(packages)):
-                    score = calc_pit(end.get_pos(), points[o].get_pos()) + h(end.get_pos(), points[o].get_pos())
-                    n_scores.append(score) 
-                for k in range(0, len(packages)):
-                    for l in range(0, len(packages)):
-                        if(l < len(packages) - 1):
-                            if(n_scores[k] < n_scores[l]):
-                                temp1 = n_scores[k]
-                                temp2 = points[k]
-                                n_scores[k] = n_scores[l]
-                                points[k] = points[l]
-                                n_scores[l] = temp1
-                                points[l] = temp2
-                last = points[0]
-                custom_path.append(points[0])
-                data.append('Pacote ' + str(count_data))
-                data.append(points[0].get_pos())
-                data.append(round(n_scores[0], 2))
-                with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(data)
-                data = []
-                points.pop(0)
-                n_scores = []
-                count = count + 1
-                count_data = count_data + 1
-                #print(count)
+        
                     
             
     
@@ -256,6 +322,70 @@ def reconstruct_path(came_from, current, draw):
         current = came_from[current]
         current.make_path()
         draw()
+
+def reconstruct_path_calc(came_from, current, draw):
+    lengths = []
+    length = 0
+    while current in came_from:
+        current = came_from[current]
+        length = length + 1
+        #current.make_path()
+        #draw()
+    
+    return length
+
+#algoritmo que calcula caminho com menor custo para um dado inicio e fim
+def algorithm_calc(draw, grid, start, end):
+    count = 0
+    total_value = 0
+    open_set = PriorityQueue()
+    open_set.put((0, count, start))
+    came_from = {}
+    new_came_from = {}
+    g_score = {spot: float("inf") for row in grid for spot in row}
+    g_score[start] = 0
+    f_score = {spot: float("inf") for row in grid for spot in row}
+    f_score[start] = h(start.get_pos(), end.get_pos())	
+    open_set_hash = {start}
+    cm_length = 0
+
+    #print(start_packages)
+
+    while not open_set.empty():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = open_set.get()[2]
+        open_set_hash.remove(current)
+        
+
+        #print(read_packages)
+
+        if (current == end ):
+            length = reconstruct_path_calc(came_from, end, draw)
+            #end.make_end()
+            cm_length = length
+
+        for neighbor in current.neighbors:
+            temp_g_score = g_score[current] + 1
+
+            if temp_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = temp_g_score
+                f_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end.get_pos())
+                if neighbor not in open_set_hash:
+                    count += 1
+                    open_set.put((f_score[neighbor], count, neighbor))
+                    open_set_hash.add(neighbor)
+                    #neighbor.make_open()
+        
+        
+        #draw()
+        #if current != start:
+            #current.make_closed()
+    
+    return cm_length
 
 #algoritmo que calcula caminho com menor custo para um dado inicio e fim
 def algorithm(draw, grid, start, end):
@@ -305,7 +435,6 @@ def algorithm(draw, grid, start, end):
                 
 
         draw()
-
         #if current != start:
             #current.make_closed()
 
@@ -413,7 +542,7 @@ def main(win, width):
                         for spot in row:
                             spot.update_neighbors(grid)
                     #solucao mais proxima para calcular a melhor rota possivel
-                    points, custom_path = calc_points(grid, start, end, packages)
+                    points, custom_path = calc_points(lambda: draw(win, grid, ROWS, width), grid, start, end, packages)
                     #print(packages)
                     #df_csv = pd.read_csv('robot_path.csv', header=[0])
                     #print(df_csv)
