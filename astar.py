@@ -121,6 +121,7 @@ def calc_points(draw , grid, start, end, packages):
     custom_path.append(start)
     temp1 = 0
     temp2 = 0
+    g_score = 0
     data = []
     custom_path_header = ['Ponto', 'Coordenadas', 'Custo']
 
@@ -165,8 +166,9 @@ def calc_points(draw , grid, start, end, packages):
 
     came_from_length = algorithm_calc(draw, grid, start, last)
     #print(came_from_length)
+    g_score = g_score + came_from_length
     for i in range(0, len(packages)):
-        score = came_from_length + h(last.get_pos(), points[i].get_pos())
+        score = g_score + h(last.get_pos(), points[i].get_pos())
         #print(calc_pit(start.get_pos(), packages[i].get_pos()))
         #print(h(start.get_pos(), packages[i].get_pos()))
         scores.append(score)
@@ -211,8 +213,9 @@ def calc_points(draw , grid, start, end, packages):
                 if(i == 0):
                     len_cp = len(custom_path)
                     came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-2], last)
+                    g_score = g_score + came_from_length
                     #print(came_from_length)
-                    f_score = came_from_length + h(last.get_pos(), end.get_pos())
+                    f_score = g_score + h(last.get_pos(), end.get_pos())
                     data.append('Pacote ' + str(count_data))
                     data.append(last.get_pos())
                     # print(str(score_count))
@@ -223,7 +226,9 @@ def calc_points(draw , grid, start, end, packages):
                     data = []
                     came_from_length = 0
                 end_score = 0
-                end_score = h(custom_path[len_cp-1].get_pos(), end.get_pos()) + 0
+                came_from_length = algorithm_calc(draw, grid, last, end)
+                g_score = g_score + came_from_length
+                end_score = g_score + 0
                 custom_path.append(end)
                 count = 0
                 data.append('End')
@@ -239,9 +244,10 @@ def calc_points(draw , grid, start, end, packages):
             if(len(points) > 0):
                 #print(len(points))
                 came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-1], end)
+                g_score = g_score + came_from_length
                 #print(came_from_length)
                 for o in range(0, len(packages)):
-                    score = came_from_length + h(end.get_pos(), points[o].get_pos())
+                    score = g_score + h(end.get_pos(), points[o].get_pos())
                     n_scores.append(score) 
                 for k in range(0, len(packages)):
                     for l in range(0, len(packages)):
@@ -276,7 +282,8 @@ def calc_points(draw , grid, start, end, packages):
         for o in range(0, len(packages)):
             came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-2], last)
             #print(came_from_length)
-            score = came_from_length + h(last.get_pos(), points[o].get_pos())
+            g_score = g_score + came_from_length
+            score = g_score + h(last.get_pos(), points[o].get_pos())
             n_scores.append(score) 
         for k in range(0, len(packages)):
             for l in range(0, len(packages)):
