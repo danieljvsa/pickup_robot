@@ -10,13 +10,15 @@
   <img  src="https://img.shields.io/static/v1?label=license&message=MIT&color=8257E5&labelColor=000000" alt="License">   
 </p>
 
+![caption](https://github.com/danieljvsa/pickup_robot/blob/main/astar_ia.gif)
+
 ## 💼 Tecnologias utilizadas
 Para o desenvolvimento deste site utilizei as seguintes tecnologias:
 
 - Python
 - PyGame (Grid)
 - A* Algoritmo (Pesquisa)
-- PriorityQueue (Algoritmo)
+- PriorityQueue (Biblioteca)
 
 ---
 
