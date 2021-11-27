@@ -115,78 +115,130 @@ def calc_points(draw , grid, start, end, packages):
     score_count = 0
     count = 0
     count_data = 0
+    temp_score = []
     scores = []
+    g_scores = []
     n_scores = []
     custom_path = []
     custom_path.append(start)
     temp1 = 0
     temp2 = 0
     g_score = 0
+    #count_g_score = 0
+    temp_g_score = []
     data = []
-    custom_path_header = ['Ponto', 'Coordenadas', 'Custo']
+    custom_path_header = ['Ponto', 'Coordenadas', 'Função de Avaliação']
+    data_point = []
 
     with open('robot_path.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(custom_path_header)
 
-
+    #print(came_from_length)
+    
     for i in range(0, len(packages)):
-        score = 0 + h(start.get_pos(), points[i].get_pos())
-        #print(calc_pit(start.get_pos(), packages[i].get_pos()))
-        #print(h(start.get_pos(), packages[i].get_pos()))
-        scores.append(score)
+        came_from_length = 0
+        count_g_score = 0
+        came_from_length = algorithm_calc(draw, grid, start, points[i])
+        for l in range(0, len(packages)):
+            if(l < len(packages) - 1):
+                if(points[i].get_pos() != points[l].get_pos()):
+                    count_g_score = g_score + came_from_length
+                    score = count_g_score + h(points[i].get_pos(), points[l].get_pos())
+                    temp_score.append(score)
+                    temp_g_score.append(count_g_score)
+                    count_g_score = 0
+        came_from_length = 0
+        for k in range(0, len(temp_score)):
+            for l in range(0, len(temp_score)):
+                if(l < len(packages) - 1):
+                    if(temp_score[k] < temp_score[l]):
+                        temp1 = temp_score[k]
+                        temp2 = temp_g_score[k]
+                        temp_score[k] = temp_score[l]
+                        temp_g_score[k] = temp_g_score[l]
+                        temp_score[l] = temp1
+                        temp_g_score[l] = temp2
+        scores.append(temp_score[0])
+        g_scores.append(temp_g_score[0])
+        temp_g_score = []
+        temp_score = []
     for k in range(0, len(packages)):
         for l in range(0, len(packages)):
             if(l < len(packages) - 1):
                 if(scores[k] < scores[l]):
                     temp1 = scores[k]
                     temp2 = points[k]
+                    temp3 = g_scores[k]
                     scores[k] = scores[l]
                     points[k] = points[l]
+                    g_scores[k] = g_scores[l]
                     scores[l] = temp1
                     points[l] = temp2
+                    g_scores[l] = temp3
     last = points[0]
-    data.append('Start')
-    data.append(start.get_pos())
+    g_score = g_score + g_scores[0]
+    temp_g_score = []
+    temp_score = []
+    count_data = count_data + 1
+    data_point.append('Pacote ' + str(count_data))
+    data_point.append(last.get_pos())
     #print(str(round(scores[0], 0))
     #print(str(score_count))
-    data.append(scores[0])
+    data_point.append(scores[0])
+    score = 0 + h(start.get_pos(), last.get_pos())
+    data.append('Start')
+    data.append(start.get_pos())
+    data.append(score)    
     with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(data)
+        writer.writerow(data_point)
         #writer.close()
     #print(data)
     data = []
+    data_point = []
     points.pop(0)
     custom_path.append(last)
     scores = []
+    g_scores = []
+    came_from_length = 0
     #print(points)
     count = count + 1
-    count_data = count_data + 1
 
-    came_from_length = algorithm_calc(draw, grid, start, last)
-    #print(came_from_length)
-    g_score = g_score + came_from_length
+
+    
+
     for i in range(0, len(packages)):
-        score = g_score + h(last.get_pos(), points[i].get_pos())
-        #print(calc_pit(start.get_pos(), packages[i].get_pos()))
-        #print(h(start.get_pos(), packages[i].get_pos()))
+        came_from_length = 0
+        count_g_score = 0
+        came_from_length = algorithm_calc(draw, grid, last, points[i])
+        count_g_score = g_score + came_from_length
+        score = count_g_score + h(points[i].get_pos(), end.get_pos())
         scores.append(score)
+        g_scores.append(count_g_score)
+        count_g_score = 0
+        came_from_length = 0
     for k in range(0, len(packages)):
         for l in range(0, len(packages)):
             if(l < len(packages) - 1):
                 if(scores[k] < scores[l]):
                     temp1 = scores[k]
                     temp2 = points[k]
+                    temp3 = g_scores[k]
                     scores[k] = scores[l]
                     points[k] = points[l]
+                    g_scores[k] = g_scores[l]
                     scores[l] = temp1
                     points[l] = temp2
+                    g_scores[l] = temp3
+    last = points[0]
+    g_score = g_score + g_scores[0]
+    count_data = count_data + 1
     data.append('Pacote ' + str(count_data))
     data.append(last.get_pos())
     #print(str(round(scores[0], 0))
     #print(str(score_count))
-    last = points[0]
     data.append(scores[0])
     with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
@@ -197,40 +249,48 @@ def calc_points(draw , grid, start, end, packages):
     points.pop(0)
     custom_path.append(last)
     scores = []
+    g_scores = []
     came_from_length = 0
+    count_g_score = 0
     #print(points)
     count = count + 1
-    count_data = count_data + 1
+    
 
     for i in range(0, len(packages)):
         #print(points)
         #print(count)
-        if(count == 2 or len(points) == 0):
-            if(custom_path[-1] == end):
+        #print(count)
+        #print(g_score)
+        if(count >= 2 or len(points) == 1):
+            
+            if(len(points) == 1):
+                #print(count)
+                came_from_length = 0
+                came_from_length = algorithm_calc(draw, grid, last, points[0])
+                g_score = g_score + came_from_length
+                score = g_score + h(points[0].get_pos(), end.get_pos())
+                #print(g_score)
+                last = points[0]
+                custom_path.append(last)
+                points.pop(0)
+                data.append('Pacote ' + str(count_data))
+                data.append(last.get_pos())
+                data.append(score)
+                with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data)
+                data = []
                 count == 0 
                 print('its end')
-            else:
-                if(i == 0):
-                    len_cp = len(custom_path)
-                    came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-2], last)
-                    g_score = g_score + came_from_length
-                    #print(came_from_length)
-                    f_score = g_score + h(last.get_pos(), end.get_pos())
-                    data.append('Pacote ' + str(count_data))
-                    data.append(last.get_pos())
-                    # print(str(score_count))
-                    data.append(round(f_score, 0))
-                    with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerow(data)
-                    data = []
-                    came_from_length = 0
+                came_from_length = 0
                 end_score = 0
                 came_from_length = algorithm_calc(draw, grid, last, end)
                 g_score = g_score + came_from_length
-                end_score = g_score + 0
+                end_score = g_score + 1
                 custom_path.append(end)
+                last = end
                 count = 0
+                came_from_length = 0
                 data.append('End')
                 data.append(end.get_pos())
                 #print(str(score_count))
@@ -239,81 +299,175 @@ def calc_points(draw , grid, start, end, packages):
                     writer = csv.writer(f)
                     writer.writerow(data) 
                 data = [] 
-                if(count_data == 2):
-                    count_data = count_data + 1
-            if(len(points) > 0):
-                #print(len(points))
-                came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-1], end)
+                scores = []
+                g_scores = []
+            elif(len(points) > 1):
+                count = 0
+                came_from_length = algorithm_calc(draw, grid, last, end)       
                 g_score = g_score + came_from_length
-                #print(came_from_length)
-                for o in range(0, len(packages)):
-                    score = g_score + h(end.get_pos(), points[o].get_pos())
-                    n_scores.append(score) 
-                for k in range(0, len(packages)):
-                    for l in range(0, len(packages)):
-                        if(l < len(packages) - 1):
+                came_from_length = 0
+                for i in range(0, len(points)):  
+                    score = g_score + h(end.get_pos(), points[i].get_pos())
+                    n_scores.append(score)
+                for k in range(0, len(n_scores)):
+                    for l in range(0, len(n_scores)):
+                        if(l < len(n_scores) - 1):
                             if(n_scores[k] < n_scores[l]):
                                 temp1 = n_scores[k]
-                                temp2 = points[k]
+                                temp2 = points[k]                               
                                 n_scores[k] = n_scores[l]
                                 points[k] = points[l]
                                 n_scores[l] = temp1
-                                points[l] = temp2
-                last = points[0]
+                                points[l] = temp2                               
+                last = end
                 custom_path.append(last)
-                data.append('Pacote ' + str(count_data))
-                data.append(last.get_pos())
+                data.append('End')
+                data.append(end.get_pos())
                # print(str(score_count))
                 data.append(round(n_scores[0], 0))
                 with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow(data)
                 data = []
+                n_scores = []
+                g_scores = []
+                came_from_length = 0
+                count_g_score = 0
+                for j in range(0, len(points)):
+                    came_from_length = 0
+                    came_from_length = algorithm_calc(draw, grid, last, points[j])
+                    for l in range(0, len(points)):
+                        if(l < len(points) - 1):
+                            if(points[j].get_pos() != points[l].get_pos()):
+                                count_g_score = g_score + came_from_length
+                                score = count_g_score + h(points[j].get_pos(), points[l].get_pos())
+                                temp_score.append(score)
+                                temp_g_score.append(count_g_score)
+                                count_g_score = 0
+                    came_from_length = 0
+                    for k in range(0, len(temp_score)):
+                        for l in range(0, len(temp_score)):
+                            if(l < len(temp_score) - 1):
+                                if(temp_score[k] < temp_score[l]):
+                                    temp1 = temp_score[k]
+                                    temp2 = temp_g_score[k]
+                                    temp_score[k] = temp_score[l]
+                                    temp_g_score[k] = temp_g_score[l]
+                                    temp_score[l] = temp1
+                                    temp_g_score[l] = temp2
+                    if(len(temp_score) > 0):
+                        n_scores.append(temp_score[0])
+                        g_scores.append(temp_g_score[0])
+                    temp_g_score = []
+                    temp_score = []
+                for k in range(0, len(n_scores)):
+                    for l in range(0, len(n_scores)):
+                        if(l < len(n_scores) - 1):
+                            if(n_scores[k] < n_scores[l]):
+                                temp1 = n_scores[k]
+                                temp2 = points[k]
+                                temp3 = g_scores[k]
+                                n_scores[k] = n_scores[l]
+                                points[k] = points[l]
+                                g_scores[k] = g_scores[l]
+                                n_scores[l] = temp1
+                                points[l] = temp2
+                                g_scores[l] = temp3
+                last = points[0]
+                if(len(g_scores) > 0):  
+                    print(g_scores)             
+                    g_score = g_score + g_scores[0]
+                if(count_data == 2):
+                    count_data = count_data + 1
+                data.append('Pacote ' + str(count_data))
+                data.append(last.get_pos())
+                #print(str(round(n_scores[0], 0)))
+                #print(str(score_count))
+                if(len(n_scores) > 0):     
+                    data.append(round(n_scores[0], 0))
+                custom_path.append(last)
+                with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data)
+                data = []
                 points.pop(0)
                 came_from_length = 0
+                count_g_score = 0
+                scores = []
+                g_scores = []
                 n_scores = []
+                temp_g_score = []
+                temp_score = []
                 count = count + 1
                 count_data = count_data + 1
                 #print(count)
-
-        len_cp = len(custom_path)
-        if(last == end):
-            print('Its end')
-        for o in range(0, len(packages)):
-            came_from_length = algorithm_calc(draw, grid, custom_path[len_cp-2], last)
-            #print(came_from_length)
-            g_score = g_score + came_from_length
-            score = g_score + h(last.get_pos(), points[o].get_pos())
-            n_scores.append(score) 
-        for k in range(0, len(packages)):
-            for l in range(0, len(packages)):
-                if(l < len(packages) - 1):
-                    if(n_scores[k] < n_scores[l]):
-                        temp1 = n_scores[k]
-                        temp2 = points[k]
-                        n_scores[k] = n_scores[l]
-                        points[k] = points[l]
-                        n_scores[l] = temp1
-                        points[l] = temp2
-        if(len(points) > 0):
-            last = points[0]
+        else:
+            for j in range(0, len(points)):
+                came_from_length = 0
+                count_g_score = 0
+                came_from_length = algorithm_calc(draw, grid, last, points[j])
+                count_g_score = g_score + came_from_length
+                for l in range(0, len(points)):
+                    if(l < len(points) - 1):
+                        if(points[j].get_pos() != points[l].get_pos()):
+                            score = count_g_score + h(points[j].get_pos(), points[l].get_pos())
+                            temp_score.append(score)
+                            temp_g_score.append(count_g_score)
+                came_from_length = 0
+                count_g_score = 0
+                for k in range(0, len(temp_score)):
+                    for l in range(0, len(temp_score)):
+                        if(l < len(temp_score) - 1):
+                            if(temp_score[k] < temp_score[l]):
+                                temp1 = temp_score[k]
+                                temp2 = temp_g_score[k]
+                                temp_score[k] = temp_score[l]
+                                temp_g_score[k] = temp_g_score[l]
+                                temp_score[l] = temp1
+                                temp_g_score[l] = temp2   
+                if(len(temp_score) > 0 or len(temp_g_score) > 0):          
+                    scores.append(temp_score[0])
+                    g_scores.append(temp_g_score[0])
+                temp_g_score = []
+                temp_score = []
+            for k in range(0, len(scores)):
+                for l in range(0, len(scores)):
+                    if(l < len(scores) - 1):
+                        if(scores[k] < scores[l]):
+                            temp1 = scores[k]
+                            temp2 = points[k]
+                            temp3 = g_scores[k]
+                            scores[k] = scores[l]
+                            points[k] = points[l]
+                            g_scores[k] = g_scores[l]
+                            scores[l] = temp1
+                            points[l] = temp2
+                            g_scores[l] = temp3
+            last = points[0]    
+            temp_score = []
+            temp_g_score = []
+            if(len(g_scores) > 0):
+                g_score = g_score + g_scores[0]
             data.append('Pacote ' + str(count_data))
             data.append(last.get_pos())
             #print(str(round(n_scores[0], 0)))
             #print(str(score_count))
-            data.append(round(n_scores[0], 0))
+            if(len(scores) > 0):     
+                data.append(round(scores[0], 0))
             custom_path.append(last)
             with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(data)
             data = []
+            n_scores = []
+            g_scores = []
             count = count + 1
             count_data = count_data + 1
-            
+            came_from_length = 0
+            count_g_score = 0
             points.pop(0)
             #print(points)
             #print(last)
-            n_scores = []
             #print(count)
         
                     
