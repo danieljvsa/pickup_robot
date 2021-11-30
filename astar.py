@@ -127,7 +127,8 @@ def calc_points(draw , grid, start, end, packages):
     #count_g_score = 0
     temp_g_score = []
     data = []
-    custom_path_header = ['Ponto', 'Coordenadas', 'Função de Avaliação']
+    #custom_path_header = ['Ponto', 'Coordenadas', 'Função de Avaliação']
+    custom_path_header = ['Ponto', 'Coordenadas']
     data_point = []
 
     with open('robot_path.csv', 'w', encoding='UTF8', newline='') as f:
@@ -140,15 +141,15 @@ def calc_points(draw , grid, start, end, packages):
         came_from_length = 0
         count_g_score = 0
         came_from_length = algorithm_calc(draw, grid, start, points[i])
+        count_g_score = g_score + came_from_length
         for l in range(0, len(packages)):
             if(l < len(packages) - 1):
-                if(points[i].get_pos() != points[l].get_pos()):
-                    count_g_score = g_score + came_from_length
+                if(points[i].get_pos() != points[l].get_pos()):                   
                     score = count_g_score + h(points[i].get_pos(), points[l].get_pos())
                     temp_score.append(score)
                     temp_g_score.append(count_g_score)
-                    count_g_score = 0
         came_from_length = 0
+        count_g_score = 0
         for k in range(0, len(temp_score)):
             for l in range(0, len(temp_score)):
                 if(l < len(packages) - 1):
@@ -185,11 +186,11 @@ def calc_points(draw , grid, start, end, packages):
     data_point.append(last.get_pos())
     #print(str(round(scores[0], 0))
     #print(str(score_count))
-    data_point.append(scores[0])
+    #data_point.append(scores[0])
     score = 0 + h(start.get_pos(), last.get_pos())
     data.append('Start')
     data.append(start.get_pos())
-    data.append(score)    
+    #data.append(score)    
     with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(data)
@@ -239,7 +240,7 @@ def calc_points(draw , grid, start, end, packages):
     data.append(last.get_pos())
     #print(str(round(scores[0], 0))
     #print(str(score_count))
-    data.append(scores[0])
+    #data.append(scores[0])
     with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(data)
@@ -261,6 +262,11 @@ def calc_points(draw , grid, start, end, packages):
         #print(count)
         #print(count)
         #print(g_score)
+        data = []
+        n_scores = []
+        g_scores = []
+        came_from_length = 0
+        count_g_score = 0
         if(count >= 2 or len(points) == 1):
             
             if(len(points) == 1):
@@ -275,7 +281,7 @@ def calc_points(draw , grid, start, end, packages):
                 points.pop(0)
                 data.append('Pacote ' + str(count_data))
                 data.append(last.get_pos())
-                data.append(score)
+                #data.append(score)
                 with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow(data)
@@ -294,7 +300,7 @@ def calc_points(draw , grid, start, end, packages):
                 data.append('End')
                 data.append(end.get_pos())
                 #print(str(score_count))
-                data.append(round(end_score, 0))
+                #data.append(round(end_score, 0))
                 with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow(data) 
@@ -303,6 +309,7 @@ def calc_points(draw , grid, start, end, packages):
                 g_scores = []
             elif(len(points) > 1):
                 count = 0
+                came_from_length = 0
                 came_from_length = algorithm_calc(draw, grid, last, end)       
                 g_score = g_score + came_from_length
                 came_from_length = 0
@@ -324,7 +331,7 @@ def calc_points(draw , grid, start, end, packages):
                 data.append('End')
                 data.append(end.get_pos())
                # print(str(score_count))
-                data.append(round(n_scores[0], 0))
+                #data.append(round(n_scores[0], 0))
                 with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow(data)
@@ -336,14 +343,15 @@ def calc_points(draw , grid, start, end, packages):
                 for j in range(0, len(points)):
                     came_from_length = 0
                     came_from_length = algorithm_calc(draw, grid, last, points[j])
+                    count_g_score = g_score + came_from_length
                     for l in range(0, len(points)):
                         if(l < len(points) - 1):
                             if(points[j].get_pos() != points[l].get_pos()):
-                                count_g_score = g_score + came_from_length
                                 score = count_g_score + h(points[j].get_pos(), points[l].get_pos())
                                 temp_score.append(score)
                                 temp_g_score.append(count_g_score)
-                                count_g_score = 0
+                                score = 0
+                    count_g_score = 0
                     came_from_length = 0
                     for k in range(0, len(temp_score)):
                         for l in range(0, len(temp_score)):
@@ -375,7 +383,7 @@ def calc_points(draw , grid, start, end, packages):
                                 g_scores[l] = temp3
                 last = points[0]
                 if(len(g_scores) > 0):  
-                    print(g_scores)             
+                    #print(g_scores)             
                     g_score = g_score + g_scores[0]
                 if(count_data == 2):
                     count_data = count_data + 1
@@ -383,8 +391,8 @@ def calc_points(draw , grid, start, end, packages):
                 data.append(last.get_pos())
                 #print(str(round(n_scores[0], 0)))
                 #print(str(score_count))
-                if(len(n_scores) > 0):     
-                    data.append(round(n_scores[0], 0))
+                #if(len(n_scores) > 0):     
+                   #data.append(round(n_scores[0], 0))
                 custom_path.append(last)
                 with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                     writer = csv.writer(f)
@@ -413,6 +421,7 @@ def calc_points(draw , grid, start, end, packages):
                             score = count_g_score + h(points[j].get_pos(), points[l].get_pos())
                             temp_score.append(score)
                             temp_g_score.append(count_g_score)
+                            score = 0
                 came_from_length = 0
                 count_g_score = 0
                 for k in range(0, len(temp_score)):
@@ -452,8 +461,8 @@ def calc_points(draw , grid, start, end, packages):
             data.append(last.get_pos())
             #print(str(round(n_scores[0], 0)))
             #print(str(score_count))
-            if(len(scores) > 0):     
-                data.append(round(scores[0], 0))
+            #if(len(scores) > 0):     
+                #data.append(round(scores[0], 0))
             custom_path.append(last)
             with open('robot_path.csv', 'a', encoding='UTF8', newline='') as f:
                 writer = csv.writer(f)
@@ -723,8 +732,8 @@ def main(win, width):
                     df_csv = pd.read_csv('robot_path.csv', header=[0])
                     print(df_csv) 
 
-                    for i in range(0, len(packages)): 
-                        packages[i].make_package()
+                    #for i in range(0, len(packages)): 
+                    #    packages[i].make_package()
 
                 if event.key == pygame.K_c:
                     start = None
